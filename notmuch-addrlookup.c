@@ -17,26 +17,31 @@ static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
 
 typedef struct {
-  gchar *realname;
+  gchar *name;
   guint  occurrences;
-} AddressFrequencies;
+} ContactInfo;
 
 
-static AddressFrequencies*
-address_frequencies_new (void)
+/*
+ * Note: Takes ownership of the passed string
+ */
+static ContactInfo*
+contact_info_new (gchar* name)
 {
-  return g_slice_new0 (AddressFrequencies);
+  ContactInfo* info =  g_slice_new0 (ContactInfo);
+  info->name = name;
+  return info;
 }
 
 
 static void
-address_frequencies_free (AddressFrequencies *freq)
+contact_info_free (ContactInfo *info)
 {
-  if (freq == NULL)
+  if (info == NULL)
     return;
 
-  g_free (freq->realname);
-  g_slice_free (AddressFrequencies, freq);
+  g_free (info->name);
+  g_slice_free (ContactInfo, info);
 }
 
 
@@ -44,9 +49,9 @@ static int
 sort_by_frequency (gconstpointer data1,
                    gconstpointer data2)
 {
-  const AddressFrequencies *mail1 = (AddressFrequencies*) data1;
-  const AddressFrequencies *mail2 = (AddressFrequencies*) data2;
-  return mail2->occurrences - mail1->occurrences;
+  const ContactInfo *info1 = (ContactInfo*) data1;
+  const ContactInfo *info2 = (ContactInfo*) data2;
+  return info2->occurrences - info1->occurrences;
 }
 
 
@@ -143,9 +148,9 @@ create_queries (notmuch_database_t *db,
 
 
 static void
-print_realname (gpointer data, gpointer userdata)
+print_contact_info_name (gpointer data, gpointer userdata)
 {
-    g_print ("%s\n", ((AddressFrequencies*) data)->realname);
+    g_print ("%s\n", ((ContactInfo*) data)->name);
 }
 
 
@@ -160,7 +165,7 @@ run_queries (notmuch_database_t *db,
   GHashTable *frequencies = g_hash_table_new_full (g_str_hash,
                                                    g_str_equal,
                                                    g_free,
-                                                   (GDestroyNotify) address_frequencies_free);
+                                                   (GDestroyNotify) contact_info_free);
 
   GRegex *match_re = g_regex_new ("\\s*((\\\"(\\\\.|[^\\\\\"])*\\\"|[^,])*"
                                   "<?(?P<mail>\\b\\w+([-+.]\\w+)*\\@\\w+[-\\.\\w]*\\.([-\\.\\w]+)*\\w\\b)>?)",
@@ -197,19 +202,21 @@ run_queries (notmuch_database_t *db,
                       gchar* addr_key = g_utf8_collate_key (addr_fold, -1);
                       g_free (addr_fold);
 
-                      AddressFrequencies *freq =
-                        (AddressFrequencies*) g_hash_table_lookup (frequencies, addr_key);
-
-                      if (freq == NULL)
+                      ContactInfo *info = (ContactInfo*) g_hash_table_lookup (frequencies, addr_key);
+                      if (info == NULL)
                         {
-                          freq = address_frequencies_new ();
-                          g_hash_table_insert (frequencies, addr_key, freq);
-                          addr_key = NULL;
+                          info = contact_info_new (from);
+                          g_hash_table_insert (frequencies, addr_key, info);
 
-                          freq->realname = from;
-                          from = NULL;
+                          /*
+                           * The ContactInfo takes the "from" string, and
+                           * the hash table takes ownership of the key. Set
+                           * them NULL to avoid the g_free() calls below to
+                           * free the memory.
+                           */
+                          addr_key = from = NULL;
                         }
-                      freq->occurrences++;
+                      info->occurrences++;
 
                       g_free (addr_key);
                     }
@@ -230,7 +237,7 @@ run_queries (notmuch_database_t *db,
 
   GList *addrs = g_hash_table_get_values (frequencies);
   addrs = g_list_sort (addrs, sort_by_frequency);
-  g_list_foreach (addrs, print_realname, NULL);
+  g_list_foreach (addrs, print_contact_info_name, NULL);
   g_list_free (addrs);
 
   g_hash_table_destroy (frequencies);
