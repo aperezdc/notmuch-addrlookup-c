@@ -17,7 +17,6 @@ static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
 
 typedef struct {
-  gchar *addr_key;
   gchar *realname;
   guint  occurrences;
 } AddressFrequencies;
@@ -36,7 +35,6 @@ address_frequencies_free (AddressFrequencies *freq)
   if (freq == NULL)
     return;
 
-  g_free (freq->addr_key);
   g_free (freq->realname);
   g_slice_free (AddressFrequencies, freq);
 }
@@ -161,7 +159,7 @@ run_queries (notmuch_database_t *db,
 
   GHashTable *frequencies = g_hash_table_new_full (g_str_hash,
                                                    g_str_equal,
-                                                   NULL,
+                                                   g_free,
                                                    (GDestroyNotify) address_frequencies_free);
 
   GRegex *match_re = g_regex_new ("\\s*((\\\"(\\\\.|[^\\\\\"])*\\\"|[^,])*"
@@ -206,8 +204,6 @@ run_queries (notmuch_database_t *db,
                         {
                           freq = address_frequencies_new ();
                           g_hash_table_insert (frequencies, addr_key, freq);
-
-                          freq->addr_key = addr_key;
                           addr_key = NULL;
 
                           freq->realname = from;
