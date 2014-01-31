@@ -17,7 +17,6 @@ static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
 
 typedef struct {
-  gchar *address;
   gchar *addr_key;
   gchar *realname;
   guint  occurrences;
@@ -37,7 +36,6 @@ address_frequencies_free (AddressFrequencies *freq)
   if (freq == NULL)
     return;
 
-  g_free (freq->address);
   g_free (freq->addr_key);
   g_free (freq->realname);
   g_slice_free (AddressFrequencies, freq);
@@ -211,9 +209,6 @@ run_queries (notmuch_database_t *db,
 
                           freq->addr_key = addr_key;
                           addr_key = NULL;
-
-                          freq->address = addr;
-                          addr = NULL;
 
                           freq->realname = from;
                           from = NULL;
