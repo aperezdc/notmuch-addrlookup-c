@@ -1,0 +1,4 @@
+notmuch-addrlookup
+.*.sw[op]
+*.py[co]
+*.o
