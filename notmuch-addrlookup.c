@@ -18,7 +18,7 @@ static gchar* notmuch_user_email = NULL;
 
 typedef struct {
   gchar *name;
-  guint  occurrences;
+  guint  occurrences[NUM_QUERIES];
 } ContactInfo;
 
 
@@ -51,7 +51,21 @@ sort_by_frequency (gconstpointer data1,
 {
   const ContactInfo *info1 = (ContactInfo*) data1;
   const ContactInfo *info2 = (ContactInfo*) data2;
-  return info2->occurrences - info1->occurrences;
+
+  if (info1->occurrences[0] == info2->occurrences[0] &&
+      info1->occurrences[1] == info2->occurrences[1] &&
+      info1->occurrences[2] == info2->occurrences[2])
+    return 0;
+
+  if ((info1->occurrences[0] <  info2->occurrences[0]) ||
+      (info1->occurrences[0] == info2->occurrences[0] &&
+       info1->occurrences[1] <  info2->occurrences[1]) ||
+      (info1->occurrences[0] == info2->occurrences[0] &&
+       info1->occurrences[1] == info2->occurrences[1] &&
+       info1->occurrences[2] <  info2->occurrences[2]))
+    return -1;
+
+  return 1;
 }
 
 
@@ -216,7 +230,7 @@ run_queries (notmuch_database_t *db,
                            */
                           addr_key = from = NULL;
                         }
-                      info->occurrences++;
+                      info->occurrences[i]++;
 
                       g_free (addr_key);
                     }
