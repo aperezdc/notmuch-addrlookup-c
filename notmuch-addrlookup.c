@@ -9,6 +9,7 @@
 #include <notmuch.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 
 #define NUM_QUERIES  3
 
@@ -266,6 +267,8 @@ main (int argc, char **argv)
       g_printerr ("Usage: %s [address prefix]\n", argv[0]);
       return EXIT_FAILURE;
     }
+
+  setlocale(LC_CTYPE, "");
 
   atexit (global_cleanup);
 
