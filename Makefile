@@ -7,7 +7,7 @@ GLIB_CFLAGS := $(shell pkg-config glib-2.0 --cflags)
 GLIB_LDLIBS := $(shell pkg-config glib-2.0 --libs)
 
 OPTFLAGS ?= -O2
-LDFLAGS  += -lnotmuch $(GLIB_LDLIBS)
+LDLIBS  += -lnotmuch $(GLIB_LDLIBS)
 CFLAGS    = -Wall $(OPTFLAGS) $(GLIB_CFLAGS) -std=c99
 
 all: notmuch-addrlookup
