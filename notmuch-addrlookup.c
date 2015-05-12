@@ -64,9 +64,9 @@ sort_by_frequency (gconstpointer data1,
       (info1->occurrences[0] == info2->occurrences[0] &&
        info1->occurrences[1] == info2->occurrences[1] &&
        info1->occurrences[2] <  info2->occurrences[2]))
-    return -1;
+    return 1;
 
-  return 1;
+  return -1;
 }
 
 
