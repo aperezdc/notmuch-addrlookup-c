@@ -17,8 +17,11 @@ static gchar* notmuch_user_abook_tag = NULL;
 static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
 static gchar** search_terms = NULL;
+static gboolean mutt_output = FALSE;
 
 static const GOptionEntry option_entries[] = {
+  { "mutt", 'm', 0, G_OPTION_ARG_NONE, &mutt_output,
+    "Format output for Mutt", NULL },
   { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &search_terms,
     "Search terms", NULL },
   { NULL }
@@ -26,18 +29,21 @@ static const GOptionEntry option_entries[] = {
 
 
 typedef struct {
+  gchar *mail;
   gchar *name;
   guint  occurrences[NUM_QUERIES];
 } ContactInfo;
 
 
 /*
- * Note: Takes ownership of the passed string
+ * Note: Takes ownership of the passed strings.
  */
 static ContactInfo*
-contact_info_new (gchar* name)
+contact_info_new (gchar *mail,
+                  gchar* name)
 {
-  ContactInfo* info =  g_slice_new0 (ContactInfo);
+  ContactInfo* info = g_slice_new0 (ContactInfo);
+  info->mail = mail;
   info->name = name;
   return info;
 }
@@ -50,6 +56,7 @@ contact_info_free (ContactInfo *info)
     return;
 
   g_free (info->name);
+  g_free (info->mail);
   g_slice_free (ContactInfo, info);
 }
 
@@ -172,16 +179,25 @@ create_queries (notmuch_database_t *db,
 
 
 static void
-print_contact_info_name (gpointer data, gpointer userdata)
+print_contact_info (gpointer data, gpointer userdata)
 {
-    g_print ("%s\n", ((ContactInfo*) data)->name);
+  ContactInfo *info = (ContactInfo*) data;
+  g_print ("%s %s\n", info->name, info->mail);
+}
+
+
+static void
+print_contact_info_mutt (gpointer data, gpointer userdata)
+{
+  ContactInfo *info = (ContactInfo*) data;
+  g_print ("%s\t%s\n", info->mail, info->name);
 }
 
 
 static void
 run_queries (notmuch_database_t *db,
              notmuch_query_t    *queries[NUM_QUERIES],
-             const gchar        *name)
+             const gchar        *query_name)
 {
   static const gchar *headers_pass0[] = { "from", NULL };
   static const gchar *headers_pass1[] = { "to", "cc", "bcc", NULL };
@@ -191,7 +207,7 @@ run_queries (notmuch_database_t *db,
                                                    g_free,
                                                    (GDestroyNotify) contact_info_free);
 
-  GRegex *match_re = g_regex_new ("\\s*((\\\"(\\\\.|[^\\\\\"])*\\\"|[^,])*"
+  GRegex *match_re = g_regex_new ("\\s*((?P<name>(\\\"(\\\\.|[^\\\\\"])*\\\"|[^,<])*)"
                                   "<?(?P<mail>\\b\\w+([-+.]\\w+)*\\@\\w+[-\\.\\w]*\\.([-\\.\\w]+)*\\w\\b)>?)",
                                   G_REGEX_OPTIMIZE, 0, NULL);
 
@@ -216,9 +232,11 @@ run_queries (notmuch_database_t *db,
               g_regex_match (match_re, froms, 0, &matches);
               while (g_match_info_matches (matches))
                 {
-                  gchar* from = g_match_info_fetch (matches, 1);
-                  gchar* addr = g_match_info_fetch_named (matches, "mail");
-                  gchar* patt = g_strdup_printf ("\\b%s", name);
+                  gchar *from = g_match_info_fetch (matches, 1);
+                  gboolean has_space = strchr (from, ' ') != NULL;
+                  gchar *name = has_space ? g_match_info_fetch_named (matches, "name") : g_strdup (from);
+                  gchar *addr = has_space ? g_match_info_fetch_named (matches, "mail") : g_strdup (from);
+                  gchar *patt = g_strdup_printf ("\\b%s", query_name);
 
                   if (g_regex_match_simple (patt, from, G_REGEX_CASELESS, 0))
                     {
@@ -229,7 +247,7 @@ run_queries (notmuch_database_t *db,
                       ContactInfo *info = (ContactInfo*) g_hash_table_lookup (frequencies, addr_key);
                       if (info == NULL)
                         {
-                          info = contact_info_new (from);
+                          info = contact_info_new (addr, name);
                           g_hash_table_insert (frequencies, addr_key, info);
 
                           /*
@@ -245,7 +263,6 @@ run_queries (notmuch_database_t *db,
                       g_free (addr_key);
                     }
 
-                  g_free (addr);
                   g_free (patt);
                   g_free (from);
 
@@ -261,9 +278,19 @@ run_queries (notmuch_database_t *db,
 
   GList *addrs = g_hash_table_get_values (frequencies);
   addrs = g_list_sort (addrs, sort_by_frequency);
-  g_list_foreach (addrs, print_contact_info_name, NULL);
-  g_list_free (addrs);
 
+  if (mutt_output)
+    {
+      g_print ("Searching database ... %u matching entries:\n",
+               g_list_length (addrs));
+      g_list_foreach (addrs, print_contact_info_mutt, NULL);
+    }
+  else
+    {
+      g_list_foreach (addrs, print_contact_info, NULL);
+    }
+
+  g_list_free (addrs);
   g_hash_table_destroy (frequencies);
 }
 
