@@ -1,6 +1,6 @@
 /*
  * notmuch-addrlookup.c
- * Copyright (C) 2014 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2014-2015 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -16,6 +16,14 @@
 static gchar* notmuch_user_abook_tag = NULL;
 static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
+static gchar** search_terms = NULL;
+
+static const GOptionEntry option_entries[] = {
+  { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &search_terms,
+    "Search terms", NULL },
+  { NULL }
+};
+
 
 typedef struct {
   gchar *name;
@@ -118,6 +126,7 @@ bailout:
 static void
 global_cleanup (void)
 {
+  g_strfreev (search_terms);
   g_free (notmuch_user_abook_tag);
   g_free (notmuch_database_path);
   g_free (notmuch_user_email);
@@ -262,15 +271,30 @@ run_queries (notmuch_database_t *db,
 int
 main (int argc, char **argv)
 {
-  if (argc != 1 && argc != 2)
+  setlocale(LC_CTYPE, "");
+  atexit (global_cleanup);
+
+  GOptionContext *option_context = g_option_context_new ("search-string");
+  g_option_context_set_strict_posix (option_context, TRUE);
+  g_option_context_add_main_entries (option_context,
+                                     option_entries,
+                                     "notmuch-addrlookup-c");
+
+  GError *error = NULL;
+  if (!g_option_context_parse (option_context, &argc, &argv, &error))
     {
-      g_printerr ("Usage: %s [address prefix]\n", argv[0]);
+      g_printerr ("%s: %s.\n", g_get_prgname (), error->message);
+      g_option_context_free (option_context);
+      g_error_free (error);
       return EXIT_FAILURE;
     }
+  g_option_context_free (option_context);
 
-  setlocale(LC_CTYPE, "");
-
-  atexit (global_cleanup);
+  if (!search_terms || g_strv_length (search_terms) == 0)
+    {
+      g_printerr ("%s: No search terms provided.\n", g_get_prgname ());
+      return EXIT_FAILURE;
+    }
 
   if (!load_notmuch_settings ())
     {
@@ -291,11 +315,12 @@ main (int argc, char **argv)
     }
 
   notmuch_query_t *queries[NUM_QUERIES] = { NULL, NULL, NULL };
-  const gchar *name = (argc == 2) ? argv[1] : NULL;
+  gchar *name = g_strjoinv (" ", search_terms);
 
   create_queries (db, queries, name);
   run_queries (db, queries, name);
 
+  g_free (name);
   notmuch_database_close (db);
   return EXIT_SUCCESS;
 }
