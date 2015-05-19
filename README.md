@@ -55,8 +55,21 @@ Noren Petersen <norenp@no.se>
 %
 ```
 
-Emacs [can be configured](http://notmuchmail.org/emacstips/#index15h2)
+### Emacs UI
+
+The Emacs Notmuch UI
+[can be configured](http://notmuchmail.org/emacstips/#index15h2)
 to use the tool for completing addresses when composing.
+
+### Mutt
+
+The [Mutt UA](http://www.mutt.org/) can be configured to use
+`notmuch-addrlookup` by setting the following options:
+
+```
+set query_command="notmuch-addrlookup --mutt '%s'"
+```
+
 
 ## License
 
