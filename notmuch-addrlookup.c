@@ -302,7 +302,9 @@ main (int argc, char **argv)
   atexit (global_cleanup);
 
   GOptionContext *option_context = g_option_context_new ("search-string");
+#if GLIB_CHECK_VERSION(2, 44, 0)
   g_option_context_set_strict_posix (option_context, TRUE);
+#endif
   g_option_context_add_main_entries (option_context,
                                      option_entries,
                                      "notmuch-addrlookup-c");
