@@ -182,7 +182,7 @@ static void
 print_contact_info (gpointer data, gpointer userdata)
 {
   ContactInfo *info = (ContactInfo*) data;
-  g_print ("%s %s\n", info->name, info->mail);
+  g_print ("%s <%s>\n", info->name, info->mail);
 }
 
 
