@@ -70,6 +70,25 @@ The [Mutt UA](http://www.mutt.org/) can be configured to use
 set query_command="notmuch-addrlookup --mutt '%s'"
 ```
 
+### alot
+
+The [alot](https://github.com/pazz/alot) MUA can be configured to use
+`notmuch-addrlookup`, using an `[accounts]` section in the configuration
+file similar to this:
+
+```
+[accounts]
+  [[youraccountname]]
+    realname = Your Name
+    address = your@address.com
+    ...
+    [[[abook]]]
+      type = shellcommand
+      regexp = '^(?P<email>[^@]+@[^\t]+)\t+(?P<name>[^\t]+)'
+      command = notmuch-addrlookup --mutt
+      ignorecase = True
+```
+
 
 ## License
 
