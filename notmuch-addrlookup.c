@@ -224,9 +224,9 @@ run_queries (notmuch_database_t *db,
         {
           notmuch_message_t *msg = notmuch_messages_get (messages);
 
-          for (guint i = 0; headers[i] != NULL; i++)
+          for (guint j = 0; headers[j] != NULL; j++)
             {
-              const gchar* froms = notmuch_message_get_header (msg, headers[i]);
+              const gchar* froms = notmuch_message_get_header (msg, headers[j]);
 
               GMatchInfo *matches;
               g_regex_match (match_re, froms, 0, &matches);
