@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Fix sorting of results. (Patch by Jeremy Simon
-  <[jtsymon@gmail.com](jtsymon@gmail.com)>.)
+  <[jtsymon@gmail.com](mailto:jtsymon@gmail.com)>.)
 
 ## [5] - 2015-06-05
 ### Fixed
@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 ## [4] - 2015-05-21
 ### Fixed
 - Allow building with versions of Glib older than 2.44. (Patch by `cellscape`
-  <[me@nooff.info](me@nooff.info)>.)
+  <[me@nooff.info](mailto:me@nooff.info)>.)
 
 ## [3] - 2015-05-19
 ### Added
