@@ -1,6 +1,6 @@
 /*
  * notmuch-addrlookup.c
- * Copyright (C) 2014-2015 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2014-2016 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
