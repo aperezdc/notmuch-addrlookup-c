@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- Do not use functions deprecated starting with `libnotmuch` 4.3; building
+  against older versions is still possible.
 
 ## [6] - 2015-11-06
 ### Added

@@ -164,9 +164,20 @@ create_queries (notmuch_database_t *db,
   queries[1] = notmuch_query_create (db, sbuf);
   g_free (sbuf);
 
+#if LIBNOTMUCH_MAJOR_VERSION >= 4 && LIBNOTMUCH_MINOR_VERSION >= 3
+  unsigned int count = 0;
+  unsigned int tmp;
+  if (notmuch_query_count_messages_st (queries[0], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;
+  if (notmuch_query_count_messages_st (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;
+#else
+  unsigned int count = notmuch_query_count_messages (queries[0])
+                     + notmuch_query_count_messages (queries[1]);
+#endif
+
   /* Pass 3: With only a few hits, add all the "from:" addresses */
-  if (notmuch_query_count_messages (queries[0]) +
-      notmuch_query_count_messages (queries[1]) < 10)
+  if (count < 10)
     {
       qs = g_string_new ("");
       if (name)
@@ -217,11 +228,17 @@ run_queries (notmuch_database_t *db,
         continue;
 
       const gchar **headers = (i == 1) ? headers_pass1 : headers_pass0;
+      notmuch_messages_t *messages = NULL;
 
-      for (notmuch_messages_t *messages = notmuch_query_search_messages (queries[i]);
-           notmuch_messages_valid (messages);
-           notmuch_messages_move_to_next (messages))
-        {
+#if LIBNOTMUCH_MAJOR_VERSION >= 4 && LIBNOTMUCH_MINOR_VERSION >= 3
+      if (notmuch_query_search_messages_st (queries[i], &messages) != NOTMUCH_STATUS_SUCCESS)
+          continue;
+#else
+      if (!(messages = notmuch_query_search_messages (queries[i])))
+          continue;
+#endif
+
+      for (; notmuch_messages_valid (messages); notmuch_messages_move_to_next (messages)) {
           notmuch_message_t *msg = notmuch_messages_get (messages);
 
           for (guint j = 0; headers[j] != NULL; j++)
