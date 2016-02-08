@@ -58,7 +58,7 @@ Noren Petersen <norenp@no.se>
 ### Emacs UI
 
 The Emacs Notmuch UI
-[can be configured](http://notmuchmail.org/emacstips/#index15h2)
+[can be configured](http://notmuchmail.org/emacstips/#index13h2)
 to use the tool for completing addresses when composing.
 
 ### Mutt
