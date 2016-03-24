@@ -45,7 +45,7 @@ All notable changes to this project will be documented in this file.
 - First working version of `notmuch-addrlookup`.
 
 [Unreleased]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v7...HEAD
-[6]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v6...v7
+[7]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v6...v7
 [6]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v5...v6
 [5]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v4...v5
 [4]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v3...v4
