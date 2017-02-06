@@ -244,6 +244,8 @@ run_queries (notmuch_database_t *db,
           for (guint j = 0; headers[j] != NULL; j++)
             {
               const gchar* froms = notmuch_message_get_header (msg, headers[j]);
+              if (!froms || *froms == '\0')
+                continue;
 
               GMatchInfo *matches;
               g_regex_match (match_re, froms, 0, &matches);
