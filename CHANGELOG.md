@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [8] - 2017-02-07
+### Fixed
+- Avoid a segmentation fault when `notmuch_message_get_header()` returns
+  `NULL`. (Patch by Víctor M. Jáquez
+  <[vjaquez@igalia.com](mailto:vjaquez@igalia.com)>).
+
 ## [7] - 2016-01-09
 ### Fixed
 - Do not use functions deprecated starting with `libnotmuch` 4.3; building
@@ -44,7 +50,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - First working version of `notmuch-addrlookup`.
 
-[Unreleased]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v7...HEAD
+[Unreleased]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v8...HEAD
+[8]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v7...v8
 [7]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v6...v7
 [6]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v5...v6
 [5]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v4...v5
