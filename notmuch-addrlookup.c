@@ -171,6 +171,13 @@ create_queries (notmuch_database_t *db,
       count += tmp;
   if (notmuch_query_count_messages_st (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
       count += tmp;
+#elif LIBNOTMUCH_MAJOR_VERSION >= 5
+  unsigned int count = 0;
+  unsigned int tmp;
+  if (notmuch_query_count_messages (queries[0], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;	
+  if (notmuch_query_count_messages (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;
 #else
   unsigned int count = notmuch_query_count_messages (queries[0])
                      + notmuch_query_count_messages (queries[1]);
@@ -233,6 +240,13 @@ run_queries (notmuch_database_t *db,
 #if LIBNOTMUCH_MAJOR_VERSION >= 5 || (LIBNOTMUCH_MAJOR_VERSION >= 4 && LIBNOTMUCH_MINOR_VERSION >= 3)
       if (notmuch_query_search_messages_st (queries[i], &messages) != NOTMUCH_STATUS_SUCCESS)
           continue;
+#elif LIBNOTMUCH_MAJOR_VERSION >= 5
+  unsigned int count = 0;
+  unsigned int tmp;
+  if (notmuch_query_count_messages (queries[0], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;	
+  if (notmuch_query_count_messages (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;
 #else
       if (!(messages = notmuch_query_search_messages (queries[i])))
           continue;
