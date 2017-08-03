@@ -15,12 +15,25 @@ One more thing: I plan to keep the tool up-to-date when new Notmuch
 releases change the API of the library. Precisely the reasons why
 this small project was started are:
 
-* Lack of maintenance of the Vala version.
-* The Python version included with Notmuch can be a tad slow when
-  working with big amounts of messages (over tens of thousands).
 * The [Go](http://golang.org) implementation included with Notmuch
   insists in outputting all the text in lowercase. Plus, requires
   a working Go development setup to build it.
+- There used to be similar tools included with Notmuch, written in Vala
+  and Python, but they have been removed due to lack of maintenance.
+
+
+## `notmuch address`
+
+Starting with version 0.19 a new `notmuch address` subcommand is available,
+which can be used to search for e-mail addresses as well. While similar,
+`notmuch-addrlookup-c` may still be preferred because:
+
+- The output format can be set to Mutt-compatible, which many existing tools
+  know how to handle.
+
+- It automatically searches for addresses in the `To:`, `Cc:`, `Bcc:`, and
+  `From:` message headers, and sorts them out by most frequently seen.
+  This usually renders more relevant results.
 
 
 ## Building
