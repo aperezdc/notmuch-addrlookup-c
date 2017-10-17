@@ -241,12 +241,8 @@ run_queries (notmuch_database_t *db,
       if (notmuch_query_search_messages_st (queries[i], &messages) != NOTMUCH_STATUS_SUCCESS)
           continue;
 #elif LIBNOTMUCH_MAJOR_VERSION >= 5
-  unsigned int count = 0;
-  unsigned int tmp;
-  if (notmuch_query_count_messages (queries[0], &tmp) == NOTMUCH_STATUS_SUCCESS)
-      count += tmp;
-  if (notmuch_query_count_messages (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
-      count += tmp;
+      if (notmuch_query_search_messages (queries[i], &messages) != NOTMUCH_STATUS_SUCCESS)
+          continue;
 #else
       if (!(messages = notmuch_query_search_messages (queries[i])))
           continue;
