@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+[9] - 2017-10-20
+### Fixed
+- Fix crash in when running queries and the program is build with Notmuch 0.25.
+  (Patch by Joshua Krusell <[joshua.krusell@v-dem.net](joshua.krusell@v-dem.net)>).
+- Fix conditional compilation when using Notmuch 0.25. (Patch by David Bremner
+  <[bremner@debian.org](bremner@debian.org)>).
+
+### Changed
+- Do not use the deprecated `notmuch_query_count_messages_st` function
+  when using Notmuch 0.25. (Patch by Adam Ruzicka
+  <[a.ruzicka@outlook.com](a.ruzicka@outlook.com)>.)
+
 ## [8] - 2017-02-07
 ### Fixed
 - Avoid a segmentation fault when `notmuch_message_get_header()` returns
@@ -50,7 +62,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - First working version of `notmuch-addrlookup`.
 
-[Unreleased]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v8...HEAD
+[Unreleased]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v9...HEAD
+[9]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v8...v9
 [8]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v7...v8
 [7]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v6...v7
 [6]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v5...v6
