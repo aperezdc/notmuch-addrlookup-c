@@ -68,6 +68,10 @@ Noren Petersen <norenp@no.se>
 %
 ```
 
+### Vim
+
+The plug-in [vim-notmuch-addrlookup](https://github.com/Konfekt/vim-notmuch-addrlookup) adds completion of e-mail addresses via `notmuch-addrlookup-c` (by default by hitting `<Ctrl-X><Ctrl-O>`) when composing an e-mail.
+
 ### Emacs UI
 
 The Emacs Notmuch UI
