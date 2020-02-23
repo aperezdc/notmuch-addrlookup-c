@@ -18,10 +18,13 @@ static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
 static gchar** search_terms = NULL;
 static gboolean mutt_output = FALSE;
+static gchar* notmuch_config_path = NULL;
 
 static const GOptionEntry option_entries[] = {
   { "mutt", 'm', 0, G_OPTION_ARG_NONE, &mutt_output,
     "Format output for Mutt", NULL },
+  { "config", 'c', 0, G_OPTION_ARG_STRING, &notmuch_config_path,
+    "Path to config file .notmuch-config", NULL },
   { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &search_terms,
     "Search terms", NULL },
   { NULL }
@@ -94,8 +97,11 @@ load_notmuch_settings (void)
 
   if (g_getenv ("NOTMUCH_CONFIG"))
     config_path = g_strdup (g_getenv ("NOTMUCH_CONFIG"));
-  else
+  else if(!notmuch_config_path)
     config_path = g_strdup_printf ("%s/.notmuch-config", g_get_home_dir ());
+  else
+    config_path = notmuch_config_path;
+
 
   if (!g_key_file_load_from_file (key_file,
                                   config_path,
