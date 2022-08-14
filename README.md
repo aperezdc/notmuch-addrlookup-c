@@ -31,6 +31,8 @@ which can be used to search for e-mail addresses as well. While similar,
 - The output format can be set to Mutt-compatible, which many existing tools
   know how to handle.
 
+- The output can also be set to aerc compatible.
+
 - It automatically searches for addresses in the `To:`, `Cc:`, `Bcc:`, and
   `From:` message headers, and sorts them out by most frequently seen.
   This usually renders more relevant results.
@@ -84,7 +86,17 @@ The [Mutt UA](http://www.mutt.org/) can be configured to use
 `notmuch-addrlookup` by setting the following options:
 
 ```
-set query_command="notmuch-addrlookup --mutt '%s'"
+set query_command="notmuch-addrlookup --format=mutt '%s'"
+```
+
+### aerc
+
+The [aerc](https://aerc-mail.org/) can be configured to use
+`notmuch-addrlookup` by setting the following options:
+
+```
+address-book-cmd=notmuch-addrlookup --format=aerc %s
+
 ```
 
 ### alot
@@ -102,7 +114,7 @@ file similar to this:
     [[[abook]]]
       type = shellcommand
       regexp = '^(?P<email>[^@]+@[^\t]+)\t+(?P<name>[^\t]+)'
-      command = notmuch-addrlookup --mutt
+      command = notmuch-addrlookup --format=mutt
       ignorecase = True
 ```
 
