@@ -17,18 +17,19 @@ static gchar* notmuch_user_abook_tag = NULL;
 static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
 static gchar** search_terms = NULL;
-static gboolean mutt_output = FALSE;
 static gchar* notmuch_config_path_lookupvar = NULL;
+static gchar* output_format_name = "default";
 
 static const GOptionEntry option_entries[] = {
-  { "mutt", 'm', 0, G_OPTION_ARG_NONE, &mutt_output,
-    "Format output for Mutt", NULL },
+  { "format", 'f', 0, G_OPTION_ARG_STRING, &output_format_name,
+    "Set format output", NULL },
   { "config", 'c', 0, G_OPTION_ARG_STRING, &notmuch_config_path_lookupvar,
     "Path to config file .notmuch-config", NULL },
   { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &search_terms,
     "Search terms", NULL },
   { NULL }
 };
+
 
 
 typedef struct {
@@ -217,11 +218,49 @@ print_contact_info_mutt (gpointer data, gpointer userdata)
   g_print ("%s\t%s\n", info->mail, info->name);
 }
 
+static void
+print_contact_info_aerc (gpointer data, gpointer userdata)
+{
+  static GRegex *replace_re = NULL;
+  if (!replace_re)
+      replace_re = g_regex_new ("\\\"?([^\\\"]+)\\\"?", G_REGEX_OPTIMIZE, 0, NULL);
+
+  ContactInfo *info = (ContactInfo*) data;
+  g_print ("%s\t%s\n", info->mail,
+          g_regex_replace(
+              replace_re,
+              info->name,
+              -1,
+              0,
+              "\\1",
+              G_REGEX_MATCH_ANCHORED,
+              NULL)
+          );
+}
+
+static void print_summary_mutt (gpointer addrs)
+{
+  g_print ("Searching database ... %u matching entries:\n", g_list_length (addrs));
+}
+
+struct PrintFormat {
+    const char *name;
+    void (*print_item)(gpointer, gpointer);
+    void (*print_header)(gpointer addrs);
+};
+
+
+static const struct PrintFormat s_formats[] = {
+    { .name = "default", .print_item = print_contact_info },
+    { .name = "aerc", .print_item = print_contact_info_aerc },
+    { .name = "mutt", .print_item = print_contact_info_mutt, .print_header = print_summary_mutt },
+};
 
 static void
 run_queries (notmuch_database_t *db,
              notmuch_query_t    *queries[NUM_QUERIES],
-             const gchar        *query_name)
+             const gchar        *query_name,
+             const struct PrintFormat *output_format)
 {
   static const gchar *headers_pass0[] = { "from", NULL };
   static const gchar *headers_pass1[] = { "to", "cc", "bcc", NULL };
@@ -315,16 +354,11 @@ run_queries (notmuch_database_t *db,
   GList *addrs = g_hash_table_get_values (frequencies);
   addrs = g_list_sort (addrs, sort_by_frequency);
 
-  if (mutt_output)
-    {
-      g_print ("Searching database ... %u matching entries:\n",
-               g_list_length (addrs));
-      g_list_foreach (addrs, print_contact_info_mutt, NULL);
-    }
-  else
-    {
-      g_list_foreach (addrs, print_contact_info, NULL);
-    }
+  if (output_format->print_header)
+      (*output_format->print_header) (addrs);
+
+  g_list_foreach (addrs, output_format->print_item, NULL);
+
 
   g_list_free (addrs);
   g_hash_table_destroy (frequencies);
@@ -354,6 +388,19 @@ main (int argc, char **argv)
       return EXIT_FAILURE;
     }
   g_option_context_free (option_context);
+  const struct PrintFormat *output_format = NULL;
+  for (unsigned i = 0; i < G_N_ELEMENTS(s_formats); i++) {
+      if (strcmp(s_formats[i].name, output_format_name) == 0) {
+          output_format = &s_formats[i];
+          break;
+      }
+  }
+
+  if (!output_format)
+    {
+      g_printerr ("%s: %s is an invalid format name.\n", g_get_prgname (),output_format_name);
+      return EXIT_FAILURE;
+    }
 
   if (!search_terms || g_strv_length (search_terms) == 0)
     {
@@ -394,7 +441,7 @@ main (int argc, char **argv)
   gchar *name = g_strjoinv (" ", search_terms);
 
   create_queries (db, queries, name);
-  run_queries (db, queries, name);
+  run_queries (db, queries, name, output_format);
 
   g_free (name);
   notmuch_database_close (db);
