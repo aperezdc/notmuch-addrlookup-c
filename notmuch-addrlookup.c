@@ -170,19 +170,19 @@ create_queries (notmuch_database_t *db,
   queries[1] = notmuch_query_create (db, sbuf);
   g_free (sbuf);
 
-#if (LIBNOTMUCH_MAJOR_VERSION >= 4 && LIBNOTMUCH_MINOR_VERSION >= 3)
-  unsigned int count = 0;
-  unsigned int tmp;
-  if (notmuch_query_count_messages_st (queries[0], &tmp) == NOTMUCH_STATUS_SUCCESS)
-      count += tmp;
-  if (notmuch_query_count_messages_st (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
-      count += tmp;
-#elif LIBNOTMUCH_MAJOR_VERSION >= 5
+#if LIBNOTMUCH_CHECK_VERSION(5, 0, 0)
   unsigned int count = 0;
   unsigned int tmp;
   if (notmuch_query_count_messages (queries[0], &tmp) == NOTMUCH_STATUS_SUCCESS)
       count += tmp;
   if (notmuch_query_count_messages (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;
+#elif LIBNOTMUCH_CHECK_VERSION(4, 3, 0)
+  unsigned int count = 0;
+  unsigned int tmp;
+  if (notmuch_query_count_messages_st (queries[0], &tmp) == NOTMUCH_STATUS_SUCCESS)
+      count += tmp;
+  if (notmuch_query_count_messages_st (queries[1], &tmp) == NOTMUCH_STATUS_SUCCESS)
       count += tmp;
 #else
   unsigned int count = notmuch_query_count_messages (queries[0])
@@ -243,11 +243,11 @@ run_queries (notmuch_database_t *db,
       const gchar **headers = (i == 1) ? headers_pass1 : headers_pass0;
       notmuch_messages_t *messages = NULL;
 
-#if (LIBNOTMUCH_MAJOR_VERSION >= 4 && LIBNOTMUCH_MINOR_VERSION >= 3)
-      if (notmuch_query_search_messages_st (queries[i], &messages) != NOTMUCH_STATUS_SUCCESS)
-          continue;
-#elif LIBNOTMUCH_MAJOR_VERSION >= 5
+#if LIBNOTMUCH_CHECK_VERSION(5, 0, 0)
       if (notmuch_query_search_messages (queries[i], &messages) != NOTMUCH_STATUS_SUCCESS)
+          continue;
+#elif LIBNOTMUCH_CHECK_VERSION(4, 3, 0)
+      if (notmuch_query_search_messages_st (queries[i], &messages) != NOTMUCH_STATUS_SUCCESS)
           continue;
 #else
       if (!(messages = notmuch_query_search_messages (queries[i])))
@@ -368,14 +368,25 @@ main (int argc, char **argv)
     }
 
   notmuch_database_t *db;
+  g_autofree char *error_msg = NULL;
+#if LIBNOTMUCH_CHECK_VERSION(5, 4, 0)
+  notmuch_status_t status = notmuch_database_open_with_config (notmuch_database_path,
+                                                               NOTMUCH_DATABASE_MODE_READ_ONLY,
+                                                               NULL,
+                                                               NULL,
+                                                               &db,
+                                                               &error_msg);
+#else
   notmuch_status_t status = notmuch_database_open (notmuch_database_path,
                                                    NOTMUCH_DATABASE_MODE_READ_ONLY,
                                                    &db);
+#endif
 
   if (status != NOTMUCH_STATUS_SUCCESS)
     {
-      g_printerr ("Could not open Notmuch database: %s\n",
-                  notmuch_status_to_string (status));
+      g_printerr ("Could not open Notmuch database: %s (%s)\n",
+                  notmuch_status_to_string (status),
+                  error_msg ? error_msg : "no error message");
       return EXIT_FAILURE;
     }
 
