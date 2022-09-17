@@ -96,13 +96,19 @@ load_notmuch_settings (void)
   gchar *config_path = NULL;
   gboolean success = FALSE;
 
-  if (g_getenv ("NOTMUCH_CONFIG"))
-    config_path = g_strdup (g_getenv ("NOTMUCH_CONFIG"));
-  else if(!notmuch_config_path_lookupvar)
-    config_path = g_strdup_printf ("%s/.notmuch-config", g_get_home_dir ());
-  else
+  if(notmuch_config_path_lookupvar)
     config_path = notmuch_config_path_lookupvar;
+  else if (g_getenv ("NOTMUCH_CONFIG"))
+    config_path = g_strdup (g_getenv ("NOTMUCH_CONFIG"));
+  else if (g_getenv ("NOTMUCH_PROFILE")){
+    if (g_getenv("XDG_CONFIG_HOME")){
+      //TODO check if file exists
+    }
+  }
+  else
+    config_path = g_strdup_printf ("%s/.notmuch-config", g_get_home_dir ());
 
+  g_print("%s\n", config_path);
 
   if (!g_key_file_load_from_file (key_file,
                                   config_path,
@@ -110,10 +116,11 @@ load_notmuch_settings (void)
                                   NULL))
     goto bailout;
 
-  notmuch_database_path = g_key_file_get_string (key_file,
-                                                 "database",
-                                                 "path",
-                                                 NULL);
+
+  if (g_getenv ("NOTMUCH_DATABASE"))
+    notmuch_database_path = g_strdup (g_getenv ("NOTMUCH_DATABASE"));
+  else if (g_key_file_get_string (key_file, "database", "path", NULL))
+    notmuch_database_path = g_key_file_get_string (key_file, "database", "path", NULL);
 
   notmuch_user_email = g_key_file_get_string (key_file,
                                               "user",
