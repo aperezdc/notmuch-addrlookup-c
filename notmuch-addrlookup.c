@@ -23,7 +23,7 @@ static gchar* output_format_name = "default";
 
 static const GOptionEntry option_entries[] = {
   { "format", 'f', 0, G_OPTION_ARG_STRING, &output_format_name,
-    "Set format output", NULL },
+    "Set format output (values: default, mutt, aerc)", NULL },
   { "mutt", 'm', 0, G_OPTION_ARG_NONE, &mutt_output,
     "Format output for Mutt (deprecated, use --format instead)", NULL },
   { "config", 'c', 0, G_OPTION_ARG_STRING, &notmuch_config_path_lookupvar,
