@@ -12,6 +12,11 @@ CFLAGS    = -Wall $(OPTFLAGS) $(GLIB_CFLAGS) -std=c99
 
 all: notmuch-addrlookup
 
+dist:
+	@ P=notmuch-addrlookup-$$(git describe --tag --exact-match | sed -e 's/^v//') ; \
+	git archive --prefix="$$P/" -o "$$P.tar.gz" @ ; \
+	echo "$$P.tar.gz"
+
 notmuch-addrlookup: notmuch-addrlookup.o
 
 clean:
@@ -20,5 +25,4 @@ clean:
 print-cflags:
 	@echo "$(CFLAGS)"
 
-.PHONY: print-cflags
-
+.PHONY: print-cflags dist

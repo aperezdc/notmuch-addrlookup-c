@@ -1,0 +1,4 @@
+/.gitattributes     export-ignore
+/.github/**         export-ignore
+/.gitignore         export-ignore
+/.ycm_extra_conf.py export-ignore
