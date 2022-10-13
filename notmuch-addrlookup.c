@@ -17,12 +17,15 @@ static gchar* notmuch_user_abook_tag = NULL;
 static gchar* notmuch_database_path = NULL;
 static gchar* notmuch_user_email = NULL;
 static gchar** search_terms = NULL;
+static gboolean mutt_output = FALSE;
 static gchar* notmuch_config_path_lookupvar = NULL;
 static gchar* output_format_name = "default";
 
 static const GOptionEntry option_entries[] = {
   { "format", 'f', 0, G_OPTION_ARG_STRING, &output_format_name,
     "Set format output", NULL },
+  { "mutt", 'm', 0, G_OPTION_ARG_NONE, &mutt_output,
+    "Format output for Mutt (deprecated, use --format instead)", NULL },
   { "config", 'c', 0, G_OPTION_ARG_STRING, &notmuch_config_path_lookupvar,
     "Path to config file .notmuch-config", NULL },
   { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &search_terms,
@@ -388,6 +391,13 @@ main (int argc, char **argv)
       return EXIT_FAILURE;
     }
   g_option_context_free (option_context);
+
+  if (mutt_output)
+    {
+      g_warning ("Option -m/--mutt is deprecated, use --format=mutt instead.");
+      output_format_name = "mutt";
+    }
+
   const struct PrintFormat *output_format = NULL;
   for (unsigned i = 0; i < G_N_ELEMENTS(s_formats); i++) {
       if (strcmp(s_formats[i].name, output_format_name) == 0) {
