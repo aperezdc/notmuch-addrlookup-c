@@ -3,7 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-[9] - 2017-10-20
+## [10] - 2022-10-13
+### Added
+- A new `-c`/`--config` option allows specifying the Notmuch configuration
+  file path. (Patch by Lars Haalck
+  <[lars.haalck@uni-muenster.de](lars.haalck@uni-muenster.de)>, and follow
+  up fix by Bence Ferdinandy <[bence@ferdinandy.com](bence@ferdinandy.com)>).
+- A new `-f`/`--format` option supersedes `--mutt`, and also allows using
+  `--format=aerc` to be used with the [aerc](https://aerc-mail.org/) user
+  agent. (Patch by Bence Ferdinandy <[bence@ferdinandy.com](bence@ferdinandy.com)>).
+
+### Fixed
+- Fix more uses of deprecated Notmuch functions.
+
+## [9] - 2017-10-20
 ### Fixed
 - Fix crash in when running queries and the program is build with Notmuch 0.25.
   (Patch by Joshua Krusell <[joshua.krusell@v-dem.net](joshua.krusell@v-dem.net)>).
@@ -63,6 +76,7 @@ All notable changes to this project will be documented in this file.
 - First working version of `notmuch-addrlookup`.
 
 [Unreleased]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v9...HEAD
+[10]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v9...v10
 [9]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v8...v9
 [8]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v7...v8
 [7]: https://github.com/aperezdc/notmuch-addrlookup-c/compare/v6...v7
